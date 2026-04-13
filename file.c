@@ -11,7 +11,7 @@ struct student
 
 void saveToFile(struct student s[], int n)
 {
-    FILE *fp = fopen("students.dat","wb");
+    FILE *fp = fopen("data/backup/students.dat","wb");
     fwrite(&n,sizeof(int),1,fp);
     fwrite(s,sizeof(struct student),n,fp);
     fclose(fp);
@@ -19,7 +19,7 @@ void saveToFile(struct student s[], int n)
 
 int loadFromFile(struct student s[])
 {
-    FILE *fp = fopen("students.dat","rb");
+    FILE *fp = fopen("data/backup/students.dat","rb");
     int n=0;
 
     if(fp==NULL)

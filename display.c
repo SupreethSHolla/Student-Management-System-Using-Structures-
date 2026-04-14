@@ -4,7 +4,7 @@ struct student
 {
     char name[35];
     char USN[15];
-    char branch[30];
+    char branch[100];
     int sem;
     char phone[15];
 };

@@ -4,36 +4,19 @@ struct student
 {
     char name[35];
     char USN[15];
-    char branch[30];
+    char branch[100];
     int sem;
     char phone[15];
 };
 
-void exportData(struct student s[], int n)
+int exportDataGUI(struct student s[], int n, int choice)
 {
-    if (n == 0)
-    {
-        printf("No data to export\n");
-        return;
-    }
+    if(n == 0) return 0;
 
-    int choice;
-
-    printf("\nExport Options:\n");
-    printf("1. Normal (Text File)\n");
-    printf("2. Excel (CSV File)\n");
-    printf("Enter choice: ");
-    scanf("%d",&choice);
-
-    if(choice == 1)
+    if(choice == 1) // TXT
     {
         FILE *fp = fopen("data/export/students.txt","w");
-
-        if(fp == NULL)
-        {
-            printf("Error creating file\n");
-            return;
-        }
+        if(fp == NULL) return -1;
 
         for(int i=0;i<n;i++)
         {
@@ -44,40 +27,21 @@ void exportData(struct student s[], int n)
             fprintf(fp,"Sem: %d\n",s[i].sem);
             fprintf(fp,"Phone: %s\n\n",s[i].phone);
         }
-
         fclose(fp);
-        printf("Exported to students.txt\n");
+        return 1;
     }
-
-    else if(choice == 2)
+    else if(choice == 2) // CSV
     {
         FILE *fp = fopen("data/export/students.csv","w");
+        if(fp == NULL) return -1;
 
-        if(fp == NULL)
-        {
-            printf("Error creating file\n");
-            return;
-        }
-
-        // Header row (important for Excel)
         fprintf(fp,"Name,USN,Branch,Sem,Phone\n");
-
         for(int i=0;i<n;i++)
         {
-            fprintf(fp,"%s,%s,%s,%d,%s\n",
-                s[i].name,
-                s[i].USN,
-                s[i].branch,
-                s[i].sem,
-                s[i].phone);
+            fprintf(fp,"%s,%s,%s,%d,%s\n", s[i].name, s[i].USN, s[i].branch, s[i].sem, s[i].phone);
         }
-
         fclose(fp);
-        printf("Exported to students.csv (Open in Excel)\n");
+        return 2;
     }
-
-    else
-    {
-        printf("Invalid choice\n");
-    }
+    return 0;
 }

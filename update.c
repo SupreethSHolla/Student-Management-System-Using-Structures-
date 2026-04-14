@@ -5,40 +5,24 @@ struct student
 {
     char name[35];
     char USN[15];
-    char branch[30];
+    char branch[100];
     int sem;
     char phone[15];
 };
 
 void saveToFile(struct student s[], int n);
 
-void updateStudent(struct student s[], int n)
+int updateStudentGUI(struct student s[], int n, const char *usn, const char *new_name, const char *new_phone)
 {
-    if (n == 0)
-    {
-        printf("No data to update\n");
-        return;
-    }
-
-    char usn[15];
-    printf("Enter USN to update: ");
-    scanf("%14s",usn);
-
     for(int i=0;i<n;i++)
     {
         if(strcmp(s[i].USN,usn)==0)
         {
-            printf("New Name: ");
-            scanf(" %34[^\n]",s[i].name);
-
-            printf("New Phone: ");
-            scanf("%14s",s[i].phone);
-
+            strncpy(s[i].name, new_name, 34); s[i].name[34] = '\0';
+            strncpy(s[i].phone, new_phone, 14); s[i].phone[14] = '\0';
             saveToFile(s,n);
-            printf("Updated\n");
-            return;
+            return 1;
         }
     }
-
-    printf("Not found\n");
+    return 0;
 }

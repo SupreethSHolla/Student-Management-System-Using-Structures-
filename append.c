@@ -17,24 +17,30 @@ void appendStudents(struct student s[], int *n)
     printf("How many students: ");
     scanf("%d",&count);
 
+    if (*n + count > 100)
+    {
+        printf("Error: Cannot add %d students. Maximum capacity is 100.\n", count);
+        return;
+    }
+
     for(int i=0;i<count;i++)
     {
         printf("\nStudent %d\n",*n+1);
 
         printf("Name: ");
-        scanf(" %[^\n]",s[*n].name);
+        scanf(" %34[^\n]",s[*n].name);
 
         printf("USN: ");
-        scanf("%s",s[*n].USN);
+        scanf("%14s",s[*n].USN);
 
         printf("Branch: ");
-        scanf(" %[^\n]",s[*n].branch);
+        scanf(" %29[^\n]",s[*n].branch);
 
         printf("Sem: ");
         scanf("%d",&s[*n].sem);
 
         printf("Phone: ");
-        scanf("%s",s[*n].phone);
+        scanf("%14s",s[*n].phone);
 
         (*n)++;
     }

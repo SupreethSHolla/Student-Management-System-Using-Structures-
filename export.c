@@ -11,6 +11,12 @@ struct student
 
 void exportData(struct student s[], int n)
 {
+    if (n == 0)
+    {
+        printf("No data to export\n");
+        return;
+    }
+
     int choice;
 
     printf("\nExport Options:\n");

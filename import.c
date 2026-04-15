@@ -24,26 +24,27 @@ int importData(struct student s[])
     // ---------- 1. Binary ----------
     if(choice == 1)
     {
-        FILE *fp = fopen("students.dat","rb");
+        FILE *fp = fopen("data/backup/students.dat","rb");
 
         if(fp == NULL)
         {
-            printf("No binary file found\n");
+            printf("No binary file found. Ensure data/backup directory exists.\n");
             return 0;
         }
 
         fread(&n,sizeof(int),1,fp);
+        if (n > 100) n = 100; // Do not exceed max capacity
         fread(s,sizeof(struct student),n,fp);
         fclose(fp);
 
-        printf("Imported from students.dat\n");
+        printf("Imported from data/backup/students.dat\n");
         return n;
     }
 
     // ---------- 2. TXT ----------
     else if(choice == 2)
     {
-        FILE *fp = fopen("data/import/students.dat","rb");
+        FILE *fp = fopen("data/import/students.txt","r");
 
         if(fp == NULL)
         {
@@ -51,7 +52,7 @@ int importData(struct student s[])
             return 0;
         }
 
-        while(fscanf(fp,"%[^,],%[^,],%[^,],%d,%s\n",
+        while(n < 100 && fscanf(fp,"%34[^,],%14[^,],%29[^,],%d,%14s\n",
               s[n].name,
               s[n].USN,
               s[n].branch,
@@ -81,7 +82,7 @@ int importData(struct student s[])
         char line[200];
         fgets(line, sizeof(line), fp);
 
-        while(fscanf(fp,"%[^,],%[^,],%[^,],%d,%s\n",
+        while(n < 100 && fscanf(fp,"%34[^,],%14[^,],%29[^,],%d,%14s\n",
               s[n].name,
               s[n].USN,
               s[n].branch,

@@ -14,9 +14,15 @@ void saveToFile(struct student s[], int n);
 
 void deleteStudent(struct student s[], int *n)
 {
+    if (*n == 0)
+    {
+        printf("No data to delete\n");
+        return;
+    }
+
     char usn[15];
     printf("Enter USN to delete: ");
-    scanf("%s",usn);
+    scanf("%14s",usn);
 
     for(int i=0;i<*n;i++)
     {

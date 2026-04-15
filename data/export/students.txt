@@ -1,0 +1,14 @@
+Student 1
+Name: SSH
+USN: 123
+Branch: ECE
+Sem: 2
+Phone: nd
+
+Student 2
+Name: SSE
+USN: 124
+Branch: ECE
+Sem: 2
+Phone: nd
+

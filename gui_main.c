@@ -40,6 +40,12 @@ extern int loadFromFile(struct student s[]);
 extern void saveToFile(struct student s[], int n);
 
 HWND hListView, hName, hUSN, hBranch, hSem, hPhone, hSearchBox;
+HFONT hFont;
+
+BOOL CALLBACK EnumChildProc(HWND hwndChild, LPARAM lParam) {
+    SendMessage(hwndChild, WM_SETFONT, (WPARAM)lParam, TRUE);
+    return TRUE;
+}
 
 void RefreshListView() {
     ListView_DeleteAllItems(hListView);
@@ -63,7 +69,20 @@ void RefreshListView() {
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch(msg) {
+        case WM_CTLCOLORSTATIC: {
+            HDC hdcStatic = (HDC)wParam;
+            SetBkMode(hdcStatic, TRANSPARENT);
+            return (LRESULT)GetSysColorBrush(COLOR_BTNFACE);
+        }
         case WM_CREATE: {
+            NONCLIENTMETRICS ncm;
+            ncm.cbSize = sizeof(NONCLIENTMETRICS);
+            if (SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0)) {
+                hFont = CreateFontIndirect(&ncm.lfMessageFont);
+            } else {
+                hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+            }
+
             // Ensure directories exist
             _mkdir("data");
             _mkdir("data/backup");
@@ -75,7 +94,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             if (student_count < 0) student_count = 0;
 
             hListView = CreateWindow(WC_LISTVIEW, "", WS_VISIBLE | WS_CHILD | LVS_REPORT | WS_BORDER,
-                20, 20, 500, 300, hwnd, (HMENU)ID_LISTVIEW, NULL, NULL);
+                20, 20, 490, 300, hwnd, (HMENU)ID_LISTVIEW, NULL, NULL);
             
             ListView_SetExtendedListViewStyle(hListView, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
             
@@ -93,30 +112,40 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 ListView_InsertColumn(hListView, i, &lvc);
             }
             
-            CreateWindow("BUTTON", "Add/Update", WS_VISIBLE | WS_CHILD, 540, 20, 100, 30, hwnd, (HMENU)ID_BTN_ADD, NULL, NULL);
-            CreateWindow("BUTTON", "Delete", WS_VISIBLE | WS_CHILD, 540, 60, 100, 30, hwnd, (HMENU)ID_BTN_DELETE, NULL, NULL);
-            CreateWindow("BUTTON", "Export TXT", WS_VISIBLE | WS_CHILD, 540, 140, 100, 30, hwnd, (HMENU)ID_BTN_EXPORT, NULL, NULL);
-            CreateWindow("BUTTON", "Export CSV", WS_VISIBLE | WS_CHILD, 540, 180, 100, 30, hwnd, (HMENU)ID_BTN_EXPORT_CSV, NULL, NULL);
+            // Operations Group
+            CreateWindow("BUTTON", "Operations", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 530, 10, 120, 100, hwnd, NULL, NULL, NULL);
+            CreateWindow("BUTTON", "Add/Update", WS_VISIBLE | WS_CHILD, 540, 30, 100, 30, hwnd, (HMENU)ID_BTN_ADD, NULL, NULL);
+            CreateWindow("BUTTON", "Delete", WS_VISIBLE | WS_CHILD, 540, 70, 100, 30, hwnd, (HMENU)ID_BTN_DELETE, NULL, NULL);
 
-            // Dedicated Search Input
-            CreateWindow("STATIC", "Search USN:", WS_VISIBLE | WS_CHILD, 540, 230, 100, 20, hwnd, NULL, NULL, NULL);
-            hSearchBox = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 540, 250, 100, 20, hwnd, (HMENU)ID_EDIT_SEARCH, NULL, NULL);
+            // Export Group
+            CreateWindow("BUTTON", "Export", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 530, 120, 120, 90, hwnd, NULL, NULL, NULL);
+            CreateWindow("BUTTON", "Export TXT", WS_VISIBLE | WS_CHILD, 540, 140, 100, 25, hwnd, (HMENU)ID_BTN_EXPORT, NULL, NULL);
+            CreateWindow("BUTTON", "Export CSV", WS_VISIBLE | WS_CHILD, 540, 175, 100, 25, hwnd, (HMENU)ID_BTN_EXPORT_CSV, NULL, NULL);
+
+            // Dedicated Search Input Group
+            CreateWindow("BUTTON", "Search", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 530, 220, 120, 100, hwnd, NULL, NULL, NULL);
+            hSearchBox = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 540, 245, 100, 25, hwnd, (HMENU)ID_EDIT_SEARCH, NULL, NULL);
+            CreateWindow("BUTTON", "Find", WS_VISIBLE | WS_CHILD, 540, 280, 100, 30, hwnd, (HMENU)ID_BTN_SEARCH, NULL, NULL);
+
+            // Inputs Group
+            CreateWindow("BUTTON", "Student Details", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 20, 330, 490, 130, hwnd, NULL, NULL, NULL);
             
-            // Inputs  
-            CreateWindow("STATIC", "Name:", WS_VISIBLE | WS_CHILD, 20, 340, 50, 20, hwnd, NULL, NULL, NULL);
-            hName = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 70, 340, 120, 20, hwnd, (HMENU)ID_EDIT_NAME, NULL, NULL);
+            CreateWindow("STATIC", "Name:", WS_VISIBLE | WS_CHILD, 35, 360, 50, 20, hwnd, NULL, NULL, NULL);
+            hName = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 90, 355, 130, 25, hwnd, (HMENU)ID_EDIT_NAME, NULL, NULL);
             
-            CreateWindow("STATIC", "USN (Key):", WS_VISIBLE | WS_CHILD, 20, 370, 70, 20, hwnd, NULL, NULL, NULL);
-            hUSN = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 90, 370, 100, 20, hwnd, (HMENU)ID_EDIT_USN, NULL, NULL);
+            CreateWindow("STATIC", "USN (Key):", WS_VISIBLE | WS_CHILD, 35, 395, 70, 20, hwnd, NULL, NULL, NULL);
+            hUSN = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 110, 390, 110, 25, hwnd, (HMENU)ID_EDIT_USN, NULL, NULL);
             
-            CreateWindow("STATIC", "Branch:", WS_VISIBLE | WS_CHILD, 20, 400, 50, 20, hwnd, NULL, NULL, NULL);
-            hBranch = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 70, 400, 120, 20, hwnd, (HMENU)ID_EDIT_BRANCH, NULL, NULL);
+            CreateWindow("STATIC", "Branch:", WS_VISIBLE | WS_CHILD, 35, 430, 50, 20, hwnd, NULL, NULL, NULL);
+            hBranch = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 90, 425, 130, 25, hwnd, (HMENU)ID_EDIT_BRANCH, NULL, NULL);
             
-            CreateWindow("STATIC", "Sem:", WS_VISIBLE | WS_CHILD, 220, 340, 40, 20, hwnd, NULL, NULL, NULL);
-            hSem = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 260, 340, 50, 20, hwnd, (HMENU)ID_EDIT_SEM, NULL, NULL);
+            CreateWindow("STATIC", "Sem:", WS_VISIBLE | WS_CHILD, 240, 360, 40, 20, hwnd, NULL, NULL, NULL);
+            hSem = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 290, 355, 60, 25, hwnd, (HMENU)ID_EDIT_SEM, NULL, NULL);
             
-            CreateWindow("STATIC", "Phone:", WS_VISIBLE | WS_CHILD, 220, 370, 50, 20, hwnd, NULL, NULL, NULL);
-            hPhone = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 270, 370, 100, 20, hwnd, (HMENU)ID_EDIT_PHONE, NULL, NULL);
+            CreateWindow("STATIC", "Phone:", WS_VISIBLE | WS_CHILD, 240, 395, 50, 20, hwnd, NULL, NULL, NULL);
+            hPhone = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER, 290, 390, 130, 25, hwnd, (HMENU)ID_EDIT_PHONE, NULL, NULL);
+
+            EnumChildWindows(hwnd, EnumChildProc, (LPARAM)hFont);
 
             RefreshListView();
             break;
@@ -203,6 +232,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             break;
         }
         case WM_DESTROY: {
+            if (hFont) DeleteObject(hFont);
             PostQuitMessage(0);
             break;
         }
@@ -220,12 +250,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = "StudentGUI";
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
+    wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
     
     RegisterClass(&wc);
 
     HWND hwnd = CreateWindow("StudentGUI", "Student Management System Windows UI",
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 680, 500, NULL, NULL, hInstance, NULL);
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 690, 520, NULL, NULL, hInstance, NULL);
 
     MSG msg;
     while(GetMessage(&msg, NULL, 0, 0)) {
